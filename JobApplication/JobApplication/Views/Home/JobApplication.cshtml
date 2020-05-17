@@ -1,0 +1,144 @@
+﻿@model JobApplicationViewModel
+
+<form asp-controller="Home" asp-action="JobApplication" method="post" id="page-form" enctype="multipart/form-data">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <span asp-validation-for="FirtsName" class="text-danger"></span>
+                <label asp-for="FirtsName"></label>
+                <input class="form-control" asp-for="FirtsName" />
+            </div>
+            <div class="col-md-6">
+                <span asp-validation-for="LastName" class="text-danger"></span>
+                <label asp-for="LastName"></label>
+                <input class="form-control" asp-for="LastName" />
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-md-4">
+                <span asp-validation-for="Email" class="text-danger"></span>
+                <label asp-for="Email"></label>
+                <input class="form-control" asp-for="Email" />
+            </div>
+            <div class="col-md-4">
+                <span asp-validation-for="Position" class="text-danger"></span>
+                <label asp-for="Position"></label>
+                <select class="form-control" asp-for="Position"
+                        asp-items="Html.GetEnumSelectList<Position>()">
+                </select>
+            </div>
+            <div class="col-md-4">
+                <span asp-validation-for="YearsOfExperiance" class="text-danger"></span>
+                <label asp-for="YearsOfExperiance"></label>
+                <input class="form-control" asp-for="YearsOfExperiance" />
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-12">
+                <textarea class="form-control"></textarea>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <span asp-validation-for="CV" class="text-danger"></span>
+            <label asp-for="CV"></label>
+            <input class="form-control" asp-for="CV" />
+        </div>
+    </div>
+    <hr />
+    <div class="row" oncopy="return false" oncut="return false" onpaste="return false">
+        <canvas id="capcha"></canvas>
+        <div class="col-md-4">
+            <input id="capcha-input" class="form-control" type="text" placeholder="Enter a shown text..." />
+        </div>
+        <button id="regenerator" type="button" class="btn btn- btn-sm text-right">Regenerate text</button>
+    </div>
+    <button id="send-button" class="btn btn-primary m-3" type="button">Submit</button>
+
+</form>
+
+<script src="/lib/tinymce/tinymce.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+    tinymce.init({
+        selector: "textarea",
+        branding: false,
+        plugins: [
+            "image paste table link code media"
+        ]
+    });
+    window.onload = function () {
+        const charsArray =
+            "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@@!#$%^&*";
+
+        const $userInput = $("#capcha-input");
+        const $button = $("#send-button");
+        const $form = $("#page-form");
+        const $regenerator = $("#regenerator");
+        let generatedText;
+
+        function loadRecapcha() {
+            addEventListeners();
+            generateText();
+        }
+
+        loadRecapcha();
+
+        function addEventListeners() {
+            $button.on("click", verify);
+            $regenerator.on("click", generateText);
+        }
+
+        function draw(text, x, y) {
+            var canvas = document.getElementById('capcha');
+            var context = canvas.getContext('2d');
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.font = '55px Bradley Hand';
+            context.fillStyle = '0,3,9';
+            context.fillText(text, x, y);
+        }
+
+        function verify() {
+            let capchaInput = $userInput.val();
+            if (!areEqual(generatedText, capchaInput)) {
+                generateText();
+                if (capchaInput === '') {
+                    alert("Please enter a validation text and try again.");
+                } else {
+                    alert("You entered a wrong text. Please try again.");
+                    clearCapchaInput();
+                }
+            }
+            else {
+                $form.submit();
+            }
+        }
+
+        function clearCapchaInput() {
+            $userInput.val('');
+        }
+
+        function areEqual(first, second) {
+            return first === second;
+        }
+
+        function generateText() {
+            let textSize = 7;
+            let text = "";
+            for (var i = 0; i < textSize; i++) {
+                let charIndex = getRandomInt(charsArray.length);
+                let currentSymbol = charsArray[charIndex];
+                text += currentSymbol;
+            }
+            generatedText = text;
+            draw(text, 10, 50);
+        }
+
+        function getRandomInt(max) {
+            return Math.floor(Math.random() * Math.floor(max));
+        }
+    }
+</script>
+
+
